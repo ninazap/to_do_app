@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     # Application settings
     APP_NAME: str = "To-Do App"
     DEBUG: bool = True
+    APP_PORT: int = 8000
     
     class Config:
         env_file = ".env"
