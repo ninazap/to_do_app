@@ -1,6 +1,7 @@
 """Главный файл приложения."""
 from fastapi import FastAPI, HTTPException
 from sqlalchemy import text
+from app.api.task import router as task_router
 from app.core.config import settings
 from app.core.database import engine, Base, SessionLocal
 
@@ -15,7 +16,7 @@ app = FastAPI(
     title=settings.APP_NAME,
     debug=settings.DEBUG,
 )
-
+app.include_router(task_router)
 
 def check_database_connection():
     """Проверяет подключение к базе данных."""
@@ -77,4 +78,3 @@ async def test_database():
             status_code=503,
             detail=f"Database connection failed: {str(e)}"
         )
-
