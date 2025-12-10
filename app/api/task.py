@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.core.db import get_db
+from app.core.database import get_db
 from app.schemas.task import TaskCreate, TaskUpdate, TaskOut
 from app.crud.task import (
     get_task,
