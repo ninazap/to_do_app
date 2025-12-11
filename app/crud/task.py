@@ -15,7 +15,12 @@ def get_tasks(db: Session) -> list[Task]:
 
 def create_task(db: Session, data: TaskCreate) -> Task:
     """Создать или обновить задачу."""
-    task = Task(title=data.title, description=data.description)
+    task = Task(
+        title=data.title,
+        description=data.description,
+        user_id=data.user_id,
+        category_id=data.category_id
+    )
     db.add(task)
     db.commit()
     db.refresh(task)
