@@ -1,38 +1,31 @@
-[tool.poetry]
-name = "to-do-app"
+[project]
+name = "auth-pro"
 version = "0.1.0"
-description = "To-Do Application"
-authors = ["Your Name <you@example.com>"]
+description = ""
+authors = [
+    {name = "Sudovtsev.M",email = "mishanya.oo@ya.ru"}
+]
 readme = "README.md"
+requires-python = ">=3.13, <4.0"
+dependencies = [
+    "fastapi[all] (>=0.122.0,<0.123.0)",
+    "pydantic (>=2.12.5,<3.0.0)",
+    "pydantic[email] (>=2.12.5,<3.0.0)",
+    "uvicorn (>=0.38.0,<0.39.0)",
+    "pydantic-settings (>=2.12.0,<3.0.0)",
+    "alembic (>=1.17.2,<2.0.0)",
+    "sqlalchemy (>=2.0.44,<3.0.0)",
+    "bcrypt (>=5.0.0,<6.0.0)",
+    "passlib[bcrypt] (>=1.7.4,<2.0.0)",
+    "python-jose[cryptography] (>=3.5.0,<4.0.0)",
+    "loguru (>=0.7.3,<0.8.0)",
+    "asyncpg (>=0.31.0,<0.32.0)",
+    "pwdlib[argon2] (>=0.3.0,<0.4.0)"
+]
 
-[tool.poetry.dependencies]
-python = "^3.11"
-fastapi = "^0.104.1"
-uvicorn = {extras = ["standard"], version = "^0.24.0"}
-sqlalchemy = "^2.0.23"
-psycopg2-binary = "^2.9.9"
-alembic = "^1.12.1"
-pydantic = "^2.5.0"
-pydantic-settings = "^2.1.0"
-python-dotenv = "^1.0.0"
-
-[tool.poetry.group.dev.dependencies]
-pytest = "^7.4.3"
-pytest-asyncio = "^0.21.1"
-black = "^23.11.0"
-flake8 = "^6.1.0"
-mypy = "^1.7.1"
+[tool.poetry]
+packages = [{include = "auth_pro", from = "src"}]
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.black]
-line-length = 100
-target-version = ['py311']
-
-[tool.mypy]
-python_version = "3.11"
-warn_return_any = true
-warn_unused_configs = true
-

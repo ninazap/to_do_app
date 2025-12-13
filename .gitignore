@@ -1,34 +1,45 @@
-# Python
+# Игнорирование виртуальных окружений Python
+venv/
+.venv/
+env/
+ENV/
+
+# Игнорирование файлов с окружением
+#.env
+#.env.*
+
+# Игнорирование скомпилированных файлов Python
 __pycache__/
 *.py[cod]
 *$py.class
-*.so
-.Python
-env/
-venv/
-ENV/
-.venv
-poetry.lock
 
-# Environment variables
-.env
-.env.local
+# Игнорирование кэша и артефактов SASS
+*.sass-cache/
+.sass-cache/
+**/.sass-cache/
 
-# IDE
-.vscode/
-.idea/
+# Игнорирование логов и временных файлов
+*.log
+*.tmp
+*.temp
 *.swp
-*.swo
-*~
 
-# OS
+# Игнорирование настроек проекта для IDE
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+
+# Игнорирование файлов сборки
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Игнорирование кэша и артефактов системы
 .DS_Store
 Thumbs.db
 
-# Docker
-*.log
-
-# Database
-*.db
-*.sqlite
-
+# Игнорирование специфичных для ОС файлов
+*.bak
+*~
