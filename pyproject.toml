@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "To-Do Application"
 authors = ["Your Name <you@example.com>"]
 readme = "README.md"
+packages = [{include = "app"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"

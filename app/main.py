@@ -2,21 +2,23 @@
 from fastapi import FastAPI, HTTPException
 from sqlalchemy import text
 from app.api.task import router as task_router
+from app.api.theme import router as theme_router
 from app.core.config import settings
 from app.core.database import engine, Base, SessionLocal
 
 # Создаем таблицы при запуске (для разработки)
 # В продакшене лучше использовать миграции Alembic
-try:
-    Base.metadata.create_all(bind=engine)
-except Exception as e:
-    print(f"Warning: Could not create tables: {e}")
+# try:
+#     Base.metadata.create_all(bind=engine)
+# except Exception as e:
+#     print(f"Warning: Could not create tables: {e}")
 
 app = FastAPI(
     title=settings.APP_NAME,
     debug=settings.DEBUG,
 )
 app.include_router(task_router)
+app.include_router(theme_router)
 
 def check_database_connection():
     """Проверяет подключение к базе данных."""

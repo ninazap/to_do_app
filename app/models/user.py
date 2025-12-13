@@ -1,8 +1,9 @@
-# models/user.py
+# app/models/user.py
 import uuid
 from datetime import datetime
 from sqlalchemy import Column, String, Boolean, DateTime, Text
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship  # Добавьте этот импорт
 from .base import Base
 
 class User(Base):
@@ -45,6 +46,11 @@ class User(Base):
         Text,
         nullable=True
     )
+    theme = Column(
+        String(20),
+        default="light",
+        nullable=False
+    )
     created_at = Column(
         DateTime,
         default=datetime.utcnow,
@@ -56,6 +62,8 @@ class User(Base):
         onupdate=datetime.utcnow,
         nullable=False
     )
+
+    tasks = relationship("Task", back_populates="user")
 
     def __repr__(self):
         return f"<User(username='{self.username}', email='{self.email}')>"
