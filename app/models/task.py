@@ -1,7 +1,7 @@
 import uuid
 from typing import Any
 
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
@@ -15,6 +15,9 @@ class Task(base.Base):
     title = Column(String, nullable=False)
     description = Column(String, nullable=True)
     is_completed = Column(Boolean, default=False)
+
+    priority = Column(Integer, default=0)
+    due_date = Column(DateTime, nullable=True)
 
     category_id = Column(
         UUID(as_uuid=True),
