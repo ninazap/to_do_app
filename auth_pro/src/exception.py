@@ -56,3 +56,31 @@ TokenInvalidFormatException = HTTPException(
     status_code = status.HTTP_400_BAD_REQUEST,
     detail = "Invalid token format. A 'Bearer <token>' is expected"
 )
+
+class RoleNotFoundException(HTTPException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Role not found",
+        )
+
+class RoleAlreadyExistsException(HTTPException):
+    def __init__(self, role_name: str):
+        super().__init__(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Role '{role_name}' already exists",
+        )
+
+class CannotDeleteSystemRoleException(HTTPException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot delete system roles",
+        )
+
+class RoleHasUsersException(HTTPException):
+    def __init__(self, users_count: int):
+        super().__init__(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Cannot delete role with {users_count} users",
+        )

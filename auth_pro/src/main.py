@@ -4,9 +4,9 @@ from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 
-from app.auth.router import router as router_auth
-
-
+from .app.auth.router import router as router_auth
+from src.app.dao.api_alembic import admin_router
+from src.app.auth.role_router import router as role_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[dict, None]:
@@ -44,7 +44,8 @@ def register_routers(app: FastAPI) -> None:
     
     app.include_router(root_router, tags=["Root"])
     app.include_router(router_auth, prefix="/auth", tags=["Authentication"])
-
+    app.include_router(admin_router, prefix="/alembic", tags=["Alembic"])
+    app.include_router(role_router, prefix="/roles", tags=["Roles"])
 
 app = create_app()
 

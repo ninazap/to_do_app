@@ -1,11 +1,12 @@
+import uuid
+
 from typing import List, TypeVar, Generic, Type
 from pydantic import BaseModel
 from loguru import logger
-
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.future import select
-from sqlalchemy import update as sqlalchemy_update, delete as sqlalchemy_delete, func
+from sqlalchemy import update as sqlalchemy_update, delete as sqlalchemy_delete, func, UUID
 
 
 from .database import Base
@@ -31,6 +32,16 @@ class BaseDAO(Generic[T]):
             logger.error(f"Error fetching record by id {data_id}: {e}")
             raise
     
+    async def find_one_or_none_by_uuid(self, data_uuid: uuid.UUID) -> T | None:
+        try:
+            query = select(self.model).filter_by(uuid=data_uuid)
+            result = await self._session.execute(query)
+            record = result.scalar_one_or_none()
+            return record
+        except SQLAlchemyError as e:
+            logger.error(f"Error fetching record by uuid {data_uuid}: {e}")
+            raise
+    
     async def find_one_or_none(self, filters: BaseModel) -> T | None:
         filter_dict = filters.model_dump(exclude_unset=True)
         logger.info(f"Finding one record {self.model.__name__} with filters: {filter_dict}")
@@ -42,7 +53,7 @@ class BaseDAO(Generic[T]):
         except SQLAlchemyError as e:
             logger.error(f"Error fetching record with filters {filters}: {e}")
             raise
-        
+
     async def find_all(self, filters: BaseModel | None = None) -> List[T]:
         filter_dict = filters.model_dump(exclude_unset=True) if filters else {}
         logger.info(f"Finding all records {self.model.__name__} with filters: {filter_dict}")
@@ -52,7 +63,7 @@ class BaseDAO(Generic[T]):
             records = result.scalars().all()
             return records
         except SQLAlchemyError as e:
-            logger.error(f"Error fetching all records with filters {filter_dict}: {e}")
+            logger.error("System error %s", e)
             raise
     
     async def add(self, values: BaseModel):
@@ -147,4 +158,38 @@ class BaseDAO(Generic[T]):
             return updated_count
         except SQLAlchemyError as e:
             logger.error(f"Error during mass update: {e}")
+            raise
+        
+    async def update_by_id(self, data_id: int, values: BaseModel) -> int:
+        """Обновить запись по ID"""
+        values_dict = values.model_dump(exclude_unset=True)
+        logger.info(f"Updating {self.model.__name__} with id {data_id} with parameters: {values_dict}")
+        
+        try:
+            query = (
+                sqlalchemy_update(self.model)
+                .where(self.model.id == data_id)
+                .values(**values_dict)
+                .execution_options(synchronize_session="fetch")
+            )
+            result = await self._session.execute(query)
+            logger.info(f"Updated {result.rowcount} records.")
+            await self._session.flush()
+            return result.rowcount
+        except SQLAlchemyError as e:
+            logger.error(f"Error updating record by id {data_id}: {e}")
+            raise
+    
+    async def delete_by_id(self, data_id: int) -> int:
+        """Удалить запись по ID"""
+        logger.info(f"Deleting {self.model.__name__} with id: {data_id}")
+        
+        try:
+            query = sqlalchemy_delete(self.model).where(self.model.id == data_id)
+            result = await self._session.execute(query)
+            logger.info(f"{result.rowcount} records were deleted.")
+            await self._session.flush()
+            return result.rowcount
+        except SQLAlchemyError as e:
+            logger.error(f"Error when deleting record by id {data_id}: {e}")
             raise

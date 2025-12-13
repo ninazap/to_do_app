@@ -1,8 +1,10 @@
 import uuid
+
 from datetime import datetime
 from decimal import Decimal
 from typing import Annotated
-from sqlalchemy import func, TIMESTAMP, Integer, inspect
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import func, TIMESTAMP, inspect
 from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase, declared_attr
 from sqlalchemy.ext.asyncio import AsyncAttrs, async_sessionmaker, create_async_engine, AsyncSession
 
@@ -16,7 +18,6 @@ str_uniq = Annotated[str, mapped_column(unique=True, nullable=False)]
 class Base(AsyncAttrs, DeclarativeBase):
     __abstract__ = True
     
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
     

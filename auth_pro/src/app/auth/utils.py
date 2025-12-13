@@ -2,14 +2,17 @@ from pwdlib import PasswordHash
 from jose import jwt
 from datetime import datetime, timedelta, timezone
 from fastapi.responses import Response
-from app.config import settings
-from app.auth.models import User
+from loguru import logger
+from uuid import UUID
+
+from src.app.config import settings
+from src.app.auth.models import User
 
 
 def create_tokens(data: dict) -> dict:
     now = datetime.now(timezone.utc)
     
-    acсess_expire = now + timedelta(seconds=10)
+    acсess_expire = now + timedelta(seconds=1800)
     access_payload = data.copy()
     access_payload.update({"exp": int(acсess_expire.timestamp()), "type": "access"})
     access_token = jwt.encode(access_payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
@@ -24,13 +27,20 @@ def create_tokens(data: dict) -> dict:
         "refresh_token": refresh_token,
         }
 
-async def authenticate_user(user, password: str) -> User | None:
-    if not user or verify_password(plain_password=password, hashed_password=user.password) is False:
+async def authenticate_user(user: User | None, password: str) -> User | None:
+    if not user:
         return None
-    return user
+    
+    try:
+        if verify_password(password, user.password):
+            return user
+    except Exception:
+        logger.error(f"Error verifying password for user {user.email}")
+    
+    return None
 
-def set_token(response: Response, user_id: int) -> None:
-    new_tokens = create_tokens(data={"sub": str(user_id)})
+def set_token(response: Response, user_uuid: UUID) -> None:
+    new_tokens = create_tokens(data={"sub": str(user_uuid)})
     access_token = new_tokens.get("access_token")
     refresh_token = new_tokens.get("refresh_token") 
     
