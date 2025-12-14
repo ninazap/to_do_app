@@ -1,6 +1,8 @@
 from pydantic import BaseModel
+
 from datetime import datetime
 
+from typing import Optional
 
 class TaskBase(BaseModel):
     title: str
@@ -9,8 +11,11 @@ class TaskBase(BaseModel):
     due_date: datetime | None = None
 
 
-class TaskCreate(TaskBase):
-    pass
+class TaskCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+    user_id: Optional[str] = None  # Если делаете через API
+
 
 
 class TaskUpdate(BaseModel):

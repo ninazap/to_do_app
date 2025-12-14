@@ -2,7 +2,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy import desc, asc
 from app.models.task import Task
 from app.schemas.task import TaskCreate, TaskUpdate
-
+from typing import List, Optional
+import uuid
 
 def get_task(db: Session, task_id: int) -> Task | None:
     """Получить задачу по ID."""
@@ -50,12 +51,15 @@ def get_tasks(
 
 def create_task(db: Session, data: TaskCreate) -> Task:
     """Создать или обновить задачу."""
+
     task = Task(
         title=data.title,
         description=data.description,
         priority=data.priority,
-        due_date=data.due_date
+        due_date=data.due_date,
+        user_id=data.user_id,
     )
+
     db.add(task)
     db.commit()
     db.refresh(task)
@@ -83,3 +87,24 @@ def delete_task(db: Session, task: Task) -> None:
     """Удалить задачу."""
     db.delete(task)
     db.commit()
+
+def get_tasks_by_user(db: Session, user_id: str):
+    try:
+        import uuid
+        user_uuid = uuid.UUID(user_id)
+        return db.query(Task).filter(
+            Task.user_id == user_uuid
+        ).all()
+    except ValueError:
+        return []
+
+def get_tasks_by_ids(db: Session, task_ids: List[int], user_id: str):
+    """Получить задачи по ID для конкретного пользователя"""
+    try:
+        user_uuid = uuid.UUID(user_id)
+        return db.query(Task).filter(
+            Task.id.in_(task_ids),
+            Task.user_id == user_uuid
+        ).all()
+    except (ValueError, AttributeError):
+        return []

@@ -1,24 +1,32 @@
 """Главный файл приложения."""
 from fastapi import FastAPI, HTTPException
 from sqlalchemy import text
+import logging
+
 from app.api.task import router as task_router
 from app.api.theme import router as theme_router
 from app.core.config import settings
 from app.core.database import engine, Base, SessionLocal
+from app.api.google_export import router as google_export_router
 
-# Создаем таблицы при запуске (для разработки)
-# В продакшене лучше использовать миграции Alembic
-# try:
-#     Base.metadata.create_all(bind=engine)
-# except Exception as e:
-#     print(f"Warning: Could not create tables: {e}")
+# Настройка логирования
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title=settings.APP_NAME,
     debug=settings.DEBUG,
 )
+
+# Включаем роутеры
 app.include_router(task_router)
 app.include_router(theme_router)
+app.include_router(google_export_router)
+
+logger.info("Application started")
 
 def check_database_connection():
     """Проверяет подключение к базе данных."""
@@ -28,7 +36,7 @@ def check_database_connection():
             result.fetchone()
             return True
     except Exception as e:
-        print(f"Database connection error: {e}")
+        logger.error(f"Database connection error: {e}")
         return False
 
 
@@ -36,47 +44,26 @@ def check_database_connection():
 async def root():
     """Корневой endpoint."""
     db_connected = check_database_connection()
+
+    # Проверяем Google OAuth настройки
+    google_configured = bool(settings.GOOGLE_CLIENT_ID and settings.GOOGLE_CLIENT_SECRET)
+
     return {
         "message": "Welcome to To-Do App",
         "status": "running",
         "database": "connected" if db_connected else "disconnected",
-        "database_url": settings.database_url.split("@")[1] if "@" in settings.database_url else "hidden"
+        "google_oauth": "configured" if google_configured else "not configured",
+        "version": "1.0.0"
     }
 
 
 @app.get("/health")
 async def health_check():
-    """Проверка здоровья приложения."""
+    """Health check endpoint."""
     db_connected = check_database_connection()
-    if not db_connected:
-        raise HTTPException(status_code=503, detail="Database connection failed")
+
     return {
-        "status": "healthy",
-        "database": "connected"
+        "status": "healthy" if db_connected else "unhealthy",
+        "database": "connected" if db_connected else "disconnected",
+        "timestamp": datetime.utcnow().isoformat()
     }
-
-
-@app.get("/db/test")
-async def test_database():
-    """Тестовый endpoint для проверки подключения к БД."""
-    try:
-        db = SessionLocal()
-        try:
-            result = db.execute(text("SELECT version(), current_database(), current_user"))
-            row = result.fetchone()
-            return {
-                "status": "success",
-                "message": "Database connection successful",
-                "database_info": {
-                    "version": row[0],
-                    "database": row[1],
-                    "user": row[2]
-                }
-            }
-        finally:
-            db.close()
-    except Exception as e:
-        raise HTTPException(
-            status_code=503,
-            detail=f"Database connection failed: {str(e)}"
-        )
