@@ -20,6 +20,11 @@ class Settings(BaseSettings):
     APP_NAME: str = "To-Do App"
     DEBUG: bool = True
     APP_PORT: int = 8000
+
+    # Google OAuth
+    GOOGLE_CLIENT_ID: str
+    GOOGLE_CLIENT_SECRET: str
+    GOOGLE_REDIRECT_URI: str = "http://localhost:8000/tasks/external-tasks/google/auth/callback"
     
     class Config:
         env_file = ".env"
