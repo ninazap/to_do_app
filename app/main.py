@@ -1,13 +1,15 @@
 """Главный файл приложения."""
+from datetime import datetime
 from fastapi import FastAPI, HTTPException
 from sqlalchemy import text
 import logging
 
 from app.api.task import router as task_router
 from app.api.theme import router as theme_router
+from app.api.auth import router as auth_router
+from app.api.google_export import router as google_export_router
 from app.core.config import settings
 from app.core.database import engine, Base, SessionLocal
-from app.api.google_export import router as google_export_router
 
 # Настройка логирования
 logging.basicConfig(
@@ -24,6 +26,7 @@ app = FastAPI(
 # Включаем роутеры
 app.include_router(task_router)
 app.include_router(theme_router)
+app.include_router(auth_router)
 app.include_router(google_export_router)
 
 logger.info("Application started")

@@ -21,15 +21,20 @@ class Settings(BaseSettings):
     DEBUG: bool = True
     APP_PORT: int = 8000
 
+    # JWT settings
+    SECRET_KEY: str = "your-secret-key-change-in-production"  # Изменить в production!
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+
     # Google OAuth
     GOOGLE_CLIENT_ID: str
     GOOGLE_CLIENT_SECRET: str
     GOOGLE_REDIRECT_URI: str = "http://localhost:8000/tasks/external-tasks/google/auth/callback"
-    
+
     class Config:
         env_file = ".env"
         case_sensitive = True
-    
+
     @property
     def database_url(self) -> str:
         """Возвращает URL для подключения к базе данных."""
@@ -42,4 +47,3 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-
