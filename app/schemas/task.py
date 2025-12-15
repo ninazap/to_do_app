@@ -1,34 +1,34 @@
-from pydantic import BaseModel
-
+# app/schemas/task.py
+from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
-
 from typing import Optional
+import uuid
+
 
 class TaskBase(BaseModel):
-    title: str
-    description: str | None = None
-    priority: int | None = 0
-    due_date: datetime | None = None
+    title: str = Field(..., min_length=1, max_length=200)
+    description: Optional[str] = Field(None, max_length=1000)
+    priority: int = Field(0, ge=0, le=10)
+    due_date: Optional[datetime] = None
 
 
-class TaskCreate(BaseModel):
-    title: str
-    description: Optional[str] = None
-    user_id: Optional[str] = None  # Если делаете через API
-
+class TaskCreate(TaskBase):
+    user_id: Optional[str] = None
+    category_id: Optional[str] = None
 
 
 class TaskUpdate(BaseModel):
-    title: str | None = None
-    description: str | None = None
-    is_completed: bool | None = None
-    priority: int | None = None
-    due_date: datetime | None = None
+    title: Optional[str] = Field(None, min_length=1, max_length=200)
+    description: Optional[str] = Field(None, max_length=1000)
+    is_completed: Optional[bool] = None
+    priority: Optional[int] = Field(None, ge=0, le=10)
+    due_date: Optional[datetime] = None
 
 
 class TaskOut(TaskBase):
     id: int
     is_completed: bool
+    category_id: Optional[uuid.UUID] = None
+    user_id: Optional[uuid.UUID] = None
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)

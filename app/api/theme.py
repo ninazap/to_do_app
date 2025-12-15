@@ -56,7 +56,7 @@ def update_theme(
         db: Session = Depends(get_db)
 ):
 
-    user = update_user_theme(db, user_id, theme_update)
+    user = update_user_theme(db, user_id, theme_update.theme)
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
 

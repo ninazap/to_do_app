@@ -19,7 +19,7 @@ def list_tasks(
     status: bool | None = Query(None, description="Фильтр по статусу: true - выполненные, false - невыполненные"),
     category_id: str | None = Query(None, description="Фильтр по ID категории"),
     sort_by: str | None = Query(None, description="Сортировка: priority, -priority, due_date, -due_date"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     Получение списка задач с поддержкой:

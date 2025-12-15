@@ -11,31 +11,30 @@ def get_task(db: Session, task_id: int) -> Task | None:
 
 
 def get_tasks(
-    db: Session,
-    skip: int = 0,
-    limit: int = 100,
-    status: bool | None = None,
-    category_id: str | None = None,
-    sort_by: str | None = None
+        db: Session,
+        skip: int = 0,
+        limit: int = 100,
+        status: bool | None = None,
+        category_id: str | None = None,
+        sort_by: str | None = None,
+        user_id: str | None = None  # Добавить параметр
 ) -> list[Task]:
-    """
-    Получить список задач с пагинацией, фильтрацией и сортировкой.
-    
-    Параметры:
-    - skip: сколько задач пропустить (для пагинации)
-    - limit: максимальное количество задач
-    - status: фильтр по статусу (True = выполненные, False = невыполненные)
-    - category_id: фильтр по категории
-    - sort_by: сортировка ('priority', '-priority', 'due_date', '-due_date')
-    """
     query = db.query(Task)
-    
+
+    # ВАЖНО: Фильтруем по пользователю если указан
+    if user_id:
+        try:
+            user_uuid = uuid.UUID(user_id)
+            query = query.filter(Task.user_id == user_uuid)
+        except ValueError:
+            pass  # Невалидный UUID, не фильтруем
+
     if status is not None:
         query = query.filter(Task.is_completed == status)
-    
+
     if category_id:
         query = query.filter(Task.category_id == category_id)
-    
+
     if sort_by:
         if sort_by == 'priority':
             query = query.order_by(asc(Task.priority))
@@ -45,7 +44,7 @@ def get_tasks(
             query = query.order_by(asc(Task.due_date))
         elif sort_by == '-due_date':
             query = query.order_by(desc(Task.due_date))
-    
+
     return query.offset(skip).limit(limit).all()
 
 

@@ -1,7 +1,7 @@
 """Схемы Pydantic для пользователей и аутентификации."""
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field, validator
 import uuid
 
 
@@ -14,7 +14,15 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     """Схема для создания пользователя (регистрация)."""
-    password: str
+    password: str = Field(..., min_length=6)
+
+    @validator('username')
+    def validate_username(cls, v):
+        if len(v) < 3:
+            raise ValueError('Имя пользователя должно быть не менее 3 символов')
+        if not v.replace('_', '').isalnum():
+            raise ValueError('Имя пользователя должно содержать только буквы, цифры и подчеркивания')
+        return v
 
 
 class UserLogin(BaseModel):
@@ -26,7 +34,7 @@ class UserLogin(BaseModel):
 class UserChangePassword(BaseModel):
     """Схема для смены пароля."""
     current_password: str
-    new_password: str
+    new_password: str = Field(..., min_length=6)
 
 
 class UserUpdate(BaseModel):
