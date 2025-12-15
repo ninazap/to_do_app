@@ -2,33 +2,97 @@
 
 Приложение для управления задачами с использованием FastAPI, PostgreSQL и Docker.
 
-## Требования
+## Команда разработчиков
 
-- Docker и Docker Compose
-- Poetry (опционально, для локальной разработки)
+| Имя и фамилия       | GitHub         | Вклад                                                              |
+|---------------------|----------------|--------------------------------------------------------------------|
+| Иван Шевцов         | @JohnBosska    | Развертывание Docker, настройка БД и Poetry                        |
+| Михаил Судовцев     | @Psix10        | Разработка системы авторизации                                     |
+| Анна Ротцы          | @AnnaR-PM      | Тестирование                                                       |
+| Диана Варава        | @Isabel2312    | Реализация сортировки, фильтрации и пагинации                      |
+| Нина Запорожец      | @ninazap       | Тимлид, разработка моделей БД                                      |
+| Кирилл Колков       | @kkolkov       | Интеграция с внешним API для хранения задач, темизация             |
+| Михаил Марков       | @mishamarkov15 | Реализация CRUD-операций
+
+
+## Результат реализации бекэнда
+
+1. Развернут Docker
+
+2. Разработаны модели данных для реализации основных функций проекта и для работы сервиса регистрации, авторизации и аутентификации.
+
+3. Разработан API для регистрации, авторизации и аутентификации. Эндпойнты:
+- регистрация;
+- аутентификация; 
+- смена пароля;
+- обновление токена.
+
+4. Разработан API для работы основных функций:
+- создание, удаление, изменение и получение задач;
+- изменение статуса;
+- пагинация;
+- фильтры по статусам и категориям задач.
+
+5. Разработано подключение к внешнему API для хранения задач.
+
+6. Разработана поддержка тёмной и светлой тем.
+
+7. Реализовано тестирование API-endpoints.
+
+## ER-диаграмма
+
+```mermaid
+erDiagram
+    users {
+        uuid id PK
+        string username
+        string email
+        string hashed_password
+        string full_name
+        boolean is_active
+        boolean is_superuser
+        string bio
+        datetime created_at
+        datetime updated_at
+        string theme
+    }
+
+    category {
+        uuid id PK
+        string name
+        string desc
+        datetime create_at
+        datetime update_at
+    }
+
+    tasks {
+        int id PK
+        string title
+        string description
+        boolean is_completed
+        int priority
+        datetime due_date
+        string google_task_id
+        string google_tasklist_id
+        datetime synced_with_google_at
+        uuid user_id FK
+        uuid category_id FK
+    }
+
+    users ||--o{ tasks : "creates"
+    category ||--o{ tasks : "categorizes"
+```
 
 ## Быстрый старт
 
 ### 1. Клонирование репозитория
 
 ```bash
-git clone <repository-url>
-cd to_do_app-1
+git clone https://github.com/ninazap/to_do_app.git
+cd to_do_app
 ```
 
-### 2. Настройка переменных окружения (опционально)
-
-Создайте файл `.env` в корне проекта (можно скопировать из `.env.example`):
-
-```env
-POSTGRES_USER=todo_user
-POSTGRES_PASSWORD=todo_password
-POSTGRES_DB=todo_db
-POSTGRES_PORT=5432
-APP_PORT=8000
-```
-
-### 3. Запуск с Docker Compose
+### 2. Запуск с Docker Compose
 
 ```bash
 docker-compose up --build
@@ -40,13 +104,12 @@ docker-compose up --build
 - Запустит Python контейнер с приложением
 - Настроит сеть между контейнерами
 
-### 4. Доступ к приложению
+### 3. Доступ к приложению
 
 - API: http://localhost:8000
 - Документация API: http://localhost:8000/docs
-- Альтернативная документация: http://localhost:8000/redoc
 
-### 5. Подключение к базе данных
+### 4. Подключение к базе данных
 
 Для подключения к PostgreSQL извне контейнера:
 
@@ -57,38 +120,7 @@ docker-compose up --build
 # Пароль: todo_password (или значение из .env)
 # База данных: todo_db (или значение из .env)
 ```
-
-## Разработка
-
-### Локальная разработка с Poetry
-
-1. Установите Poetry: https://python-poetry.org/docs/#installation
-
-2. Установите зависимости:
-
-```bash
-poetry install
-```
-
-3. Активируйте виртуальное окружение:
-
-```bash
-poetry shell
-```
-
-4. Запустите только базу данных:
-
-```bash
-docker-compose up db
-```
-
-5. Запустите приложение локально:
-
-```bash
-poetry run uvicorn app.main:app --reload
-```
-
-### Работа с миграциями Alembic
+### 5. Проведение миграций
 
 ```bash
 # Создание миграции
@@ -97,6 +129,13 @@ docker-compose exec app poetry run alembic revision --autogenerate -m "descripti
 # Применение миграций
 docker-compose exec app poetry run alembic upgrade head
 ```
+
+### 6. Запуск тестов
+
+```bash
+docker-compose exec app poetry run pytest
+```
+
 
 ## Структура проекта
 
@@ -108,34 +147,14 @@ to_do_app-1/
 │   ├── crud/         # CRUD операции
 │   ├── models/       # SQLAlchemy модели
 │   ├── schemas/      # Pydantic схемы
-│   ├── services/     # Бизнес-логика
+│   ├── services/     # Службы
 │   └── main.py       # Точка входа приложения
 ├── tests/            # Тесты
+├── alembic/          # Миграции
 ├── docker-compose.yml
 ├── Dockerfile
 ├── pyproject.toml    # Конфигурация Poetry
 └── README.md
-```
-
-## Полезные команды
-
-```bash
-# Остановка контейнеров
-docker-compose down
-
-# Остановка с удалением volumes (удалит данные БД!)
-docker-compose down -v
-
-# Просмотр логов
-docker-compose logs -f app
-docker-compose logs -f db
-
-# Выполнение команд в контейнере
-docker-compose exec app poetry run python -m pytest
-docker-compose exec app bash
-
-# Пересборка образов
-docker-compose build --no-cache
 ```
 
 ## Переменные окружения
